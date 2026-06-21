@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadyX - Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="imagens/logoradyx.png">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+
+    <a class="logo">RadyX</a>
+
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+    <ul class="nav-links" id="menu">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="monitor.php">Monitor de radiação</a></li>
+        <li><a href="usuario.php">Usuário</a></li>
+        <li><a href="contato.html">Contato</a></li>
+        <li class="logout-item">
+            <a href="index.html" class="btn-secondary">Sair</a>
+        </li>
+    </ul>
+
+    <div class="nav-btn">
+        <a href="index.html" class="btn-secondary">Sair</a>
+    </div>
+
+    
+</nav>
+
+    <!-- Content -->
+    <div class="content-box" style="margin-top: 3rem; margin-left: 5%; margin-right: 5%;">
+        <h2>Bem-vindo ao RadyX</h2>
+        <p>Um sistema desenvolvido pensando nos profissionais da saúde que são frequentemente expostos a radiação ionizante em seus ambientes de trabalho. Visando uma segurança ao fornecer informações essenciais para o seu conforto na realização de suas atividades. Os resultados são apresentados por meio de gráficos e tabelas, com dados obtidos a partir das informações inseridas pelo usuário, sendo elas: o tipo de aparelho emissor de radiação, nível de radiação, distância entre o profissional e o equipamento, tempo de férias e dados de exames preventivos.</p>
+        
+        <p>O sistema também produz relatórios mensais, semestrais e anuais, simples e objetivos, que mostram os níveis de radiação aos quais os profissionais estiveram expostos durante os períodos analisados. A radiação ionizante faz parte do ambiente de trabalho de muitos profissionais da saúde, como técnicos e tecnólogos em radiologia, radiologistas, dentistas, enfermeiros, veterinários que atuam com fontes como raios-X, fluoroscopia ou medicina nuclear. Para garantir a segurança, é essencial monitorar sua exposição, pois mesmo pequenas doses acumuladas podem trazer riscos.</p>
+
+        <h3>Dose segura e limites regulamentares:</h3>
+        <p>No Brasil, conforme a CNEN, o limite anual de dose para profissionais expostos é de 20 mSv em média por ano, podendo ser até 50 mSv em um único ano, considerado em média por um período de cinco anos. O princípio ALARA — "As Low As Reasonably Achievable" — reforça a necessidade de manter as doses tão baixas quanto possível, sem comprometer a qualidade dos procedimentos.</p>
+
+        <h3>O que são dosímetros?</h3>
+        <p>São dispositivos individuais que medem a dose de radiação ionizante recebida ao longo do tempo. Funcionam como um "contador pessoal de exposição", informando o acumulado em mSv.</p>
+
+        <h3>Principais tipos de dosímetro:</h3>
+        <ul>
+            <li><strong>TLD (termo-luminescente):</strong> contém cristais (LiF ou CaF₂) que armazenam energia da radiação e, quando aquecidos, liberam luz proporcional à dose;</li>
+            <li><strong>OSL (luminescência estimulada opticamente):</strong> usa cristal de Al₂O₃, que ao receber estímulo óptico emite luz convertida em dose acumulada;</li>
+            <li><strong>Eletrônico:</strong> sensores captam e mostram a dose em tempo real, fornecendo dados instantâneos e acumulados.</li>
+        </ul>
+
+        <h3>Importância da Dosimetria</h3>
+        <p>A radiação ionizante tem energia suficiente para romper ligações moleculares e danificar o DNA, potencialmente causando efeitos estocásticos, como câncer. A dosimetria individual permite detectar exposição excessiva antes que os limites anuais sejam ultrapassados, possibilitando ajustes em tempo, equipamentos de segurança ou distância, evitando qualquer risco.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>RadyX</h3>
+                <p>Sistema de monitoramento de exposição à radiação ionizante para profissionais de saúde.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Links Rápidos</h3>
+                <ul class="footer-links">
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="monitor.php">Monitor de Radiação</a></li>
+                    <li><a href="usuario.php">Usuário</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                </ul>
+            </div>
+          
+        </div>
+        <div class="footer-bottom">
+            <p>Trabalho Acadêmico - Sem fins lucrativos<br>Maria Rodrigues,  Leonardo Viana e Kayky Padella 2025 - &copyTodos os direitos reservados</p><br>
+            <a href="#" class="back-to-top" onclick="window.scrollTo(0,0)">Voltar ao topo</a>
+        </div>
+    </footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById("menu").classList.toggle("show");
+}
+</script>
+    
+</body>
+</html>

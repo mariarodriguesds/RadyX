@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadyX - Contato</title>
+    <link rel="icon" href="imagens/logoradyx.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+<nav>
+
+    <a class="logo">RadyX</a>
+
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+    <ul class="nav-links" id="menu">
+        <li><a href="home.html">Home</a></li>
+        <li><a href="monitor.php">Monitor de radiação</a></li>
+        <li><a href="usuario.php">Usuário</a></li>
+        <li><a href="contato.html">Contato</a></li>
+        <li class="logout-item">
+            <a href="index.html" class="btn-secondary">Sair</a>
+        </li>
+    </ul>
+
+    <div class="nav-btn">
+        <a href="index.html" class="btn-secondary">Sair</a>
+    </div>
+
+</nav>
+
+    <!-- Contact Content -->
+    <div class="contact-container">
+        <h1 class="contact-header">Entre em Contato</h1>
+        
+        <div class="contact-grid">
+            <div class="contact-form">
+                <h2>Envie sua mensagem</h2>
+                <form>
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Assunto</label>
+                        <input type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mensagem</label>
+                        <textarea required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Enviar Mensagem</button>
+                </form>
+            </div>
+
+            <div class="contact-info">
+                <div class="info-card">
+                    <h2>Informações de Contato</h2>
+                    <div class="info-item">
+                        <span class="info-icon">✉</span>
+                        <span>contato@radyx.com</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">📞</span>
+                        <span>(11) 9999-9999</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">📍</span>
+                        <span>São Paulo, SP - Brasil</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h2>Suporte Técnico</h2>
+                    <p>Nossa equipe está disponível para ajudar com questões técnicas, dúvidas sobre dosimetria e orientações sobre uso seguro do sistema.</p>
+                    <p><strong>Horário de atendimento:</strong></p>
+                    <p>Segunda a Sexta: 8h às 18h<br>Sábado: 8h às 12h</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>RadyX</h3>
+                <p>Sistema de monitoramento de exposição à radiação ionizante para profissionais de saúde.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Links Rápidos</h3>
+                <ul class="footer-links">
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="monitor.php">Monitor de Radiação</a></li>
+                    <li><a href="usuario.php">Usuário</a></li>
+                    <li><a href="contato.html">Contato</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Trabalho Acadêmico - Sem fins lucrativos<br>Maria Rodrigues,  Leonardo Viana e Kayky Padella 2025 - &copyTodos os direitos reservados</p><br>
+            <a href="#" class="back-to-top" onclick="window.scrollTo(0,0)">Voltar ao topo</a>
+        </div>
+    </footer>
+
+<script>
+
+function toggleMenu() {
+    document.getElementById("menu").classList.toggle("show");
+}
+
+</script>
+</body>
+</html>
