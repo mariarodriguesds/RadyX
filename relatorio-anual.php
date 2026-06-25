@@ -656,6 +656,8 @@ $tituloPeriodo =
 
                         </span>
 
+                        <br><br>
+
                     </div>
 
                 <?php endforeach; ?>
