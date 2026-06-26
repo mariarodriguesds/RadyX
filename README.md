@@ -53,11 +53,12 @@ O sistema permite o gerenciamento de funcionários, monitoramento de dosimetria,
 
 ### Área do Funcionário
 
-<br><br>
+<br>
 
 #### Painel de Monitoramento
 ![Painel de Monitoramento](screenshots/monitor.png)
 
+<br><br>
 
 #### Registro de Exposição — Versão Mobile
 <p align="center">
