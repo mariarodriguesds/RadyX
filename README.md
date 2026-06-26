@@ -56,8 +56,10 @@ O sistema permite o gerenciamento de funcionários, monitoramento de dosimetria,
 #### Painel de Monitoramento
 ![Painel de Monitoramento](screenshots/monitor.png)
 
-#### Registro de Exposição
+<p aligin = center>
+#### Registro de Exposição - Versão Mobile
 ![Registro de Exposição](screenshots/registro_exposicao.png)
+</p>
 
 #### Relatório Semestral
 ![Relatório Semestral](screenshots/relatorio_semestral.png)
