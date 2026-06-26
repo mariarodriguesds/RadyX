@@ -56,25 +56,32 @@ O sistema permite o gerenciamento de funcionários, monitoramento de dosimetria,
 
 <br><br>
 
-#### Registro de Exposição — Versão Mobile
+#### Registro de Exposição — Versão Mobile <br>
 <p align="center">
   <img src="screenshots/registro_exposicao.png" alt="Registro de Exposição — Versão Mobile">
 </p>
 
-#### Relatório Semestral
+<br><br>
+
+#### Relatório Semestral <br>
 ![Relatório Semestral](screenshots/relatorio_semestral.png)
 
-#### Página do Usuário
+<br><br>
+
+#### Página do Usuário <br>
 ![Página do Usuário](screenshots/usuario.png)
 
+<br><br>
 
 ### Área da Instituição
 
 
-#### Gerenciamento de Profissional
+#### Gerenciamento de Profissional <br>
 ![Gerenciamento de Profissional](screenshots/funcionario.png)
 
-#### Informação dos Profissionais 
+<br><br>
+
+#### Informação dos Profissionais <br>
 ![Informação dos Profissionais](screenshots/funcionario_infos.png)
 
 
