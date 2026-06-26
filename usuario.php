@@ -2,13 +2,30 @@
 session_start();
 require "conn.php";
 
-// apenas funcionários podem acessar
 if (!isset($_SESSION['funcionario_id'])) {
     header("Location: login.php");
-    exit;
+    exit();
 }
 
-$funcionario_id = $_SESSION['funcionario_id'];
+$id_funcionario = $_SESSION['funcionario_id'] ?? null;
+
+// buscar empresa
+$id_empresa = null;
+
+if ($id_funcionario) {
+
+    $stmtE = $pdo->prepare("
+        SELECT id_empresa
+        FROM funcionario
+        WHERE id = ?
+    ");
+
+    $stmtE->execute([$id_funcionario]);
+
+    $rowE = $stmtE->fetch(PDO::FETCH_ASSOC);
+
+    $id_empresa = $rowE['id_empresa'] ?? null;
+}
 
 /* =========================
    DADOS DO FUNCIONÁRIO
@@ -19,7 +36,7 @@ $sql = $pdo->prepare("
     WHERE id = ?
 ");
 
-$sql->execute([$funcionario_id]);
+$sql->execute([$id_funcionario]);
 
 $func = $sql->fetch(PDO::FETCH_ASSOC);
 
@@ -27,77 +44,291 @@ $func = $sql->fetch(PDO::FETCH_ASSOC);
    EXPOSIÇÕES
 ========================= */
 
-$sqlExp = $pdo->prepare("
-    SELECT 
-        re.id,
-        re.data_inicio,
-        re.data_termino,
-        re.hora_inicio,
-        re.hora_termino,
-        re.quantas_pausas,
+$meses_labels = [];
+$horas_mes = [];
 
-        re.equipamento_emissor,
-        re.distancia,
-        re.barreira,
-        re.qual_barreira,
+$sql = "
+SELECT
+    DATE_FORMAT(data_inicio, '%Y-%m') AS mes,
 
-        ee.nome_equipamento
+    SUM(
+        TIMESTAMPDIFF(
+            MINUTE,
+            CONCAT(data_inicio,' ',hora_inicio),
+            CONCAT(data_termino,' ',hora_termino)
+        )
+    ) / 60 AS horas
 
-    FROM registro_exposicao re
+FROM registro_exposicao
 
-    LEFT JOIN equipamento_exposicao ee 
-        ON ee.id_exposicao = re.id
+WHERE id_funcionario = :id
 
-    WHERE re.id_funcionario = ?
+GROUP BY mes
+ORDER BY mes DESC
+LIMIT 6
+";
 
-    ORDER BY re.data_inicio DESC
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute([
+    ':id' => $id_funcionario
+]);
+
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$rows = array_reverse($rows);
+
+foreach ($rows as $r) {
+
+    $meses_labels[] = date("M/Y", strtotime($r['mes']."-01"));
+
+    $horas_mes[] = (float)$r['horas'];
+}
+
+if (empty($meses_labels)) {
+
+    $today = new DateTime();
+
+    for ($i=4; $i>=0; $i--) {
+
+        $m = (clone $today)->modify("-{$i} months");
+
+        $meses_labels[] = $m->format('M/Y');
+
+        $horas_mes[] = 0;
+    }
+}
+
+
+// ===========================
+// DISTÂNCIA MÉDIA
+// ===========================
+
+$distancia_mes = [];
+
+$sql = "
+SELECT
+    DATE_FORMAT(data_inicio, '%Y-%m') AS mes,
+    AVG(distancia) AS media
+
+FROM registro_exposicao
+
+WHERE id_funcionario = :id
+
+GROUP BY mes
+ORDER BY mes DESC
+LIMIT 6
+";
+
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute([
+    ':id' => $id_funcionario
+]);
+
+$rows = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+foreach ($rows as $r) {
+
+    $distancia_mes[] = (float)$r['media'];
+}
+
+
+// ===========================
+// BARREIRAS
+// ===========================
+
+$barreira_mes = [];
+
+$sql = "
+SELECT
+    DATE_FORMAT(data_inicio, '%Y-%m') AS mes,
+    SUM(barreira) AS total
+
+FROM registro_exposicao
+
+WHERE id_funcionario = :id
+
+GROUP BY mes
+ORDER BY mes DESC
+LIMIT 6
+";
+
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute([
+    ':id' => $id_funcionario
+]);
+
+$rows = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+foreach ($rows as $r) {
+
+    $barreira_mes[] = (int)$r['total'];
+}
+
+
+// ===========================
+// PAUSAS
+// ===========================
+
+$pausas_mes = [];
+
+$sql = "
+SELECT
+    DATE_FORMAT(data_inicio, '%Y-%m') AS mes,
+    SUM(quantas_pausas) AS total
+
+FROM registro_exposicao
+
+WHERE id_funcionario = :id
+
+GROUP BY mes
+ORDER BY mes DESC
+LIMIT 6
+";
+
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute([
+    ':id' => $id_funcionario
+]);
+
+$rows = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+foreach ($rows as $r) {
+
+    $pausas_mes[] = (int)$r['total'];
+}
+
+
+// ===========================
+// COMPARAÇÃO EMPRESA
+// ===========================
+
+$empresa_mes = [];
+
+foreach ($meses_labels as $lab) {
+
+    $dt = DateTime::createFromFormat('M/Y', $lab);
+
+    $mesAno = $dt ? $dt->format('Y-m') : date('Y-m');
+
+    $sql = "
+        SELECT AVG(horas) AS media FROM (
+
+            SELECT
+                r.id_funcionario,
+
+                SUM(
+                    TIMESTAMPDIFF(
+                        MINUTE,
+                        CONCAT(r.data_inicio,' ',r.hora_inicio),
+                        CONCAT(r.data_termino,' ',r.hora_termino)
+                    )
+                ) / 60 AS horas
+
+            FROM registro_exposicao r
+
+            INNER JOIN funcionario f
+            ON f.id = r.id_funcionario
+
+            WHERE f.id_empresa = :id_empresa
+            AND DATE_FORMAT(r.data_inicio,'%Y-%m') = :mes
+
+            GROUP BY r.id_funcionario
+
+        ) sub
+    ";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        ':id_empresa' => $id_empresa,
+        ':mes' => $mesAno
+    ]);
+
+    $r = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $empresa_mes[] = $r && $r['media'] !== null
+        ? (float)$r['media']
+        : 0;
+}
+
+
+// ===========================
+// TABELA
+// ===========================
+
+$detalhes = [];
+
+$stmt = $pdo->prepare("
+SELECT *
+FROM registro_exposicao
+WHERE id_funcionario = :id
+ORDER BY data_inicio DESC
+LIMIT 50
 ");
 
-$sqlExp->execute([$funcionario_id]);
+$stmt->execute([
+    ':id' => $id_funcionario
+]);
 
-$exposicoes = $sqlExp->fetchAll(PDO::FETCH_ASSOC);
+$detalhes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* =========================
-   EQUIPAMENTOS
-========================= */
 
-$sqlEquipamentos = $pdo->prepare("
-    SELECT *
-    FROM equipamento_exposicao
-    WHERE id_exposicao = ?
-");
+// JSON
 
-/* =========================
-   PAUSAS
-========================= */
+$json_meses = json_encode($meses_labels, JSON_UNESCAPED_UNICODE);
 
-$sqlPausas = $pdo->prepare("
-    SELECT *
-    FROM pausa_exposicao
-    WHERE id_exposicao = ?
-");
+$json_horas = json_encode($horas_mes);
+
+$json_distancia = json_encode($distancia_mes);
+
+$json_barreira = json_encode($barreira_mes);
+
+$json_pausas = json_encode($pausas_mes);
+
+$json_empresa = json_encode($empresa_mes);
+
+$json_voce = json_encode($horas_mes);
 
 /* =========================
    TOTAL HORAS
 ========================= */
 
+$stmtHorasTotais = $pdo->prepare("
+    SELECT 
+        data_inicio,
+        data_termino,
+        hora_inicio,
+        hora_termino
+    FROM registro_exposicao
+    WHERE id_funcionario = ?
+      AND MONTH(data_inicio) = MONTH(CURRENT_DATE())
+      AND YEAR(data_inicio) = YEAR(CURRENT_DATE())
+");
+
+$stmtHorasTotais->execute([$id_funcionario]);
+
+$registrosHoras = $stmtHorasTotais->fetchAll(PDO::FETCH_ASSOC);
+
 $totalHoras = 0;
 
-foreach ($exposicoes as $exp) {
+$totalHoras = 0;
+
+foreach ($registrosHoras as $r) {
 
     $inicio = strtotime(
-        $exp['data_inicio'] . ' ' . $exp['hora_inicio']
+        $r['data_inicio'] . ' ' . $r['hora_inicio']
     );
 
     $fim = strtotime(
-        $exp['data_termino'] . ' ' . $exp['hora_termino']
+        $r['data_termino'] . ' ' . $r['hora_termino']
     );
 
     if ($fim > $inicio) {
-
-        $diferencaSegundos = $fim - $inicio;
-
-        $totalHoras += $diferencaSegundos / 3600;
+        $totalHoras += ($fim - $inicio) / 3600;
     }
 }
 
@@ -107,11 +338,13 @@ foreach ($exposicoes as $exp) {
 
 $sqlExames = $pdo->prepare("
     SELECT *
-    FROM exame_preventivo 
+    FROM exame_preventivo
     WHERE id_funcionario = ?
+      AND MONTH(data_exame) = MONTH(CURRENT_DATE())
+      AND YEAR(data_exame) = YEAR(CURRENT_DATE())
 ");
 
-$sqlExames->execute([$funcionario_id]);
+$sqlExames->execute([$id_funcionario]);
 
 $exames = $sqlExames->fetchAll(PDO::FETCH_ASSOC);
 
@@ -130,7 +363,7 @@ $sqlDose = $pdo->prepare("
     AND YEAR(data_dossimetro) = YEAR(CURRENT_DATE())
 ");
 
-$sqlDose->execute([$funcionario_id]);
+$sqlDose->execute([$id_funcionario]);
 
 $doses = $sqlDose->fetchAll(PDO::FETCH_ASSOC);
 
@@ -461,144 +694,96 @@ $iniciais = $primeiraInicial . $ultimaInicial;
 
         </div>
 
+        <br><br>
+
         <!-- HISTÓRICO -->
 
-        <div class="stats-card" style="margin-top:2rem;">
+        <div class="table-wrap">
 
-            <h2 style="margin-bottom:2rem;">
+        <br>
+
+            <center><h2 style="margin-bottom:2rem;">
 
                 Histórico de Exposição
 
-            </h2>
+            </h2></center>
 
-            <?php if ($exposicoes): ?>
+            <table class="report-table">
 
-                <div class="table-responsive2">
+                <thead>
 
-                    <table style="width:95%; margin:auto; border-collapse:collapse;">
+                    <tr>
 
+                        <th>Equipamento</th>
 
-                        <thead>
+                        <th>Distância (m)</th>
+
+                        <th>Início</th>
+
+                        <th>Término</th>
+
+                        <th>Barreira</th>
+
+                        <th>Pausas</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <?php if(empty($detalhes)): ?>
+
+                        <tr>
+                            <td colspan="6">
+                                Nenhum registro encontrado.
+                            </td>
+                        </tr>
+
+                    <?php else: ?>
+
+                        <?php foreach($detalhes as $d): ?>
+
                             <tr>
-                                <th>Data</th>
-                                <th>Equipamento</th>
-                                <th>Distância (m)</th>
-                                <th>Barreira</th>
-                                <th>Pausas</th>
-                                <th>Duração (h)</th>
+
+                                <td>
+                                    <?= htmlspecialchars($d['equipamento_emissor']) ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($d['distancia']) ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($d['data_inicio']) ?>
+                                    <?= htmlspecialchars($d['hora_inicio']) ?>
+                                </td>
+
+                                <td>
+                                    <?= htmlspecialchars($d['data_termino']) ?>
+                                    <?= htmlspecialchars($d['hora_termino']) ?>
+                                </td>
+
+                                <td>
+                                    <?= $d['barreira']
+                                        ? htmlspecialchars($d['qual_barreira'])
+                                        : 'Não'
+                                    ?>
+                                </td>
+
+                                <td>
+                                    <?= (int)$d['quantas_pausas'] ?>
+                                </td>
+
                             </tr>
-                        </thead>
 
-                        </thead>
+                        <?php endforeach; ?>
 
-                        <tbody>
+                    <?php endif; ?>
 
-                            <?php foreach ($exposicoes as $exp): ?>
+                </tbody>
 
-                                <?php
-
-                                    $sqlEquipamentos->execute([$exp['id']]);
-
-                                    $equipamentos = $sqlEquipamentos->fetchAll(PDO::FETCH_ASSOC);
-
-                                    $inicio = strtotime(
-                                        $exp['data_inicio'] . ' ' . $exp['hora_inicio']
-                                    );
-
-                                    $fim = strtotime(
-                                        $exp['data_termino'] . ' ' . $exp['hora_termino']
-                                    );
-
-                                    $duracao = 0;
-
-                                    if ($fim > $inicio) {
-
-                                        $duracao = round(
-                                            ($fim - $inicio) / 3600,
-                                            2
-                                        );
-                                    }
-
-                                ?>
-
-                                <tr>
-
-                                    <td>
-                                        <?= date('d/m/Y', strtotime($exp['data_inicio'])) ?>
-                                    </td>
-
-                                    <td>
-
-                                        <?php
-
-                                        if (!empty($exp['nome_equipamento'])) {
-
-                                            echo htmlspecialchars($exp['nome_equipamento']);
-
-                                        } elseif (!empty($exp['equipamento_emissor'])) {
-
-                                            echo htmlspecialchars($exp['equipamento_emissor']);
-
-                                        } else {
-
-                                            echo "-";
-
-                                        }
-
-                                        ?>
-
-                                    </td>
-
-                                    <td>
-
-                                        <?= $exp['distancia']
-                                            ? htmlspecialchars($exp['distancia']) . ' m'
-                                            : '-' ?>
-
-                                    </td>
-
-                                    <td>
-
-                                        <?php
-
-                                        if ($exp['barreira']) {
-
-                                            echo !empty($exp['qual_barreira'])
-                                                ? htmlspecialchars($exp['qual_barreira'])
-                                                : 'Sim';
-
-                                        } else {
-
-                                            echo 'Não';
-
-                                        }
-
-                                        ?>
-
-                                    </td>
-
-                                    <td>
-                                        <?= (int)$exp['quantas_pausas'] ?>
-                                    </td>
-
-                                    <td>
-                                        <?= number_format($duracao, 2) ?> h
-                                    </td>
-
-                                </tr>
-
-                            <?php endforeach; ?>
-
-                        </tbody>
-
-                    </table>
-                </div>
-
-            <?php else: ?>
-
-                <p>Nenhuma exposição registrada.</p>
-
-            <?php endif; ?>
+            </table>
 
         </div>
 
