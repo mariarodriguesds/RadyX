@@ -51,8 +51,7 @@ O sistema permite o gerenciamento de funcionários, monitoramento de dosimetria,
 
 ### Área do Funcionário
 
-#### Painel de Monitoramento
-<br>
+#### Painel de Monitoramento <br>
 ![Painel de Monitoramento](screenshots/monitor.png)
 
 <br><br>
