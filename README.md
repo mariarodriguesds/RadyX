@@ -1,4 +1,4 @@
-# Sistema de Monitoramento da Radiação Ionizante
+# Sistema de Controle da Exposição à Radiação Ionizante
 
 ## Descrição
 
